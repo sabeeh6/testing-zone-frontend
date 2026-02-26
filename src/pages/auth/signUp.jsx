@@ -31,18 +31,38 @@ const fadeUp = {
 //   </div>
 // );
 
+import { authService } from "../../api/authService";
+
 export default function SignUp() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const onSubmit = async () => {
+  const onSubmit = async (formData) => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1800));
-    setLoading(false);
-    setDone(true);
+    setApiError("");
+    try {
+      // Mapping frontend fields to backend requirements
+      const payload = {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        password: formData.password,
+        role: "user" // Default role as specified in plan
+      };
+
+      const response = await authService.signUp(payload);
+      console.log("Sign up success:", response);
+      if (response.success) {
+        setDone(true);
+      }
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputBase = "w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-300";
@@ -144,6 +164,16 @@ export default function SignUp() {
                   </p>
                 </motion.div>
 
+                {apiError && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg"
+                  >
+                    {apiError}
+                  </motion.div>
+                )}
+
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   {/* Name row */}
                   <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
@@ -182,9 +212,8 @@ export default function SignUp() {
                   {/* Password */}
                   <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible">
                     <label className="block text-xs text-gray-600 mb-1.5 font-medium">Password</label>
-                    <div className={`relative border rounded-lg transition-all focus-within:ring-2 focus-within:ring-gray-100 ${
-                      errors.password ? "border-red-300 bg-red-50" : "border-gray-200 bg-white focus-within:border-gray-400"
-                    }`}>
+                    <div className={`relative border rounded-lg transition-all focus-within:ring-2 focus-within:ring-gray-100 ${errors.password ? "border-red-300 bg-red-50" : "border-gray-200 bg-white focus-within:border-gray-400"
+                      }`}>
                       <input
                         type={showPwd ? "text" : "password"}
                         {...register("password", {

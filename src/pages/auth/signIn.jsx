@@ -31,16 +31,37 @@ const fadeUp = {
 //   </div>
 // );
 
+import { authService } from "../../api/authService";
+import { useNavigate } from "react-router-dom";
+
 export default function SignIn() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const onSubmit = async () => {
+  const onSubmit = async (data) => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1800));
-    setLoading(false);
+    setApiError("");
+    try {
+      const response = await authService.signIn(data);
+      console.log("Sign in success:", response);
+      // For professional approach, store token if needed, or just redirect
+      if (response.success) {
+        // Store token in cookies for frontend route protection
+        const token = response.data?.token;
+        if (token) {
+          document.cookie = `token=${token}; path=/; max-age=${2 * 24 * 60 * 60}; samesite=strict`;
+        }
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputBase = "w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-300";
@@ -119,6 +140,16 @@ export default function SignIn() {
             </p>
           </motion.div>
 
+          {apiError && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg"
+            >
+              {apiError}
+            </motion.div>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Email */}
             <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible">
@@ -143,9 +174,8 @@ export default function SignIn() {
                   Forgot password?
                 </Link>
               </div>
-              <div className={`relative border rounded-lg transition-all focus-within:ring-2 focus-within:ring-gray-100 ${
-                errors.password ? "border-red-300 bg-red-50" : "border-gray-200 bg-white focus-within:border-gray-400"
-              }`}>
+              <div className={`relative border rounded-lg transition-all focus-within:ring-2 focus-within:ring-gray-100 ${errors.password ? "border-red-300 bg-red-50" : "border-gray-200 bg-white focus-within:border-gray-400"
+                }`}>
                 <input
                   type={showPwd ? "text" : "password"}
                   {...register("password", {
@@ -197,7 +227,7 @@ export default function SignIn() {
               <Link to="/privacy" className="text-gray-700 font-semibold underline">Privacy policy</Link>.
             </motion.p>
           </form>
-{/* 
+          {/* 
           Divider
           <motion.div custom={5} variants={fadeUp} initial="hidden" animate="visible" className="flex items-center gap-4 my-5">
             <div className="flex-1 h-px bg-gray-100" />

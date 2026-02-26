@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -21,89 +22,24 @@ import {
   X,
 } from "lucide-react";
 import ProjectsTable, { StatusBadge } from "../components/ProjectTable";
-
-// ─── Mock Data ─────────────────────────────────────────────────────────────────
-const MOCK_PROJECTS = [
-  {
-    id: 1,
-    name: "Horizon CRM",
-    developers: [{ name: "Alice" }, { name: "Bob" }, { name: "Carlos" }],
-    testers: [{ name: "Diana" }, { name: "Evan" }],
-    description: "Customer relationship management platform with AI-driven insights.",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "DataForge Pipeline",
-    developers: [{ name: "Frank" }, { name: "Grace" }],
-    testers: [{ name: "Hannah" }],
-    description: "Real-time ETL pipeline for processing large-scale analytics data.",
-    status: "In Review",
-  },
-  {
-    id: 3,
-    name: "ShopEase Mobile",
-    developers: [{ name: "Ivan" }, { name: "Julia" }, { name: "Kevin" }, { name: "Lena" }],
-    testers: [{ name: "Mike" }, { name: "Nina" }],
-    description: "Cross-platform mobile e-commerce app with AR product preview.",
-    status: "Pending",
-  },
-  {
-    id: 4,
-    name: "SecureVault Auth",
-    developers: [{ name: "Omar" }],
-    testers: [{ name: "Paula" }, { name: "Quinn" }],
-    description: "OAuth 2.0 & biometric authentication microservice.",
-    status: "Blocked",
-  },
-  {
-    id: 5,
-    name: "CloudDeploy CLI",
-    developers: [{ name: "Rachel" }, { name: "Sam" }],
-    testers: [{ name: "Tina" }],
-    description: "Developer CLI tool for one-command cloud infrastructure deployments.",
-    status: "Completed",
-  },
-  {
-    id: 6,
-    name: "MedSync Portal",
-    developers: [{ name: "Uma" }, { name: "Victor" }, { name: "Wendy" }],
-    testers: [{ name: "Xavier" }, { name: "Yara" }],
-    description: "Healthcare provider portal for patient records and scheduling.",
-    status: "Active",
-  },
-  {
-    id: 7,
-    name: "EduTrack LMS",
-    developers: [{ name: "Zane" }, { name: "Amy" }],
-    testers: [{ name: "Ben" }],
-    description: "Learning management system with adaptive quiz engine.",
-    status: "In Review",
-  },
-  {
-    id: 8,
-    name: "LogiTrack Fleet",
-    developers: [{ name: "Cara" }],
-    testers: [],
-    description: "Real-time fleet tracking and route optimization dashboard.",
-    status: "Pending",
-  },
-];
+import { authService } from "../api/authService";
+import { projectService } from "../api/projectService";
+import { useNavigate } from "react-router-dom";
 
 // ─── Stat Cards ────────────────────────────────────────────────────────────────
-const STATS = [
-  { label: "Total Projects", value: 8, icon: FolderKanban, color: "bg-gray-900",     textColor: "text-white",       sub: "+2 this month" },
-  { label: "Active",         value: 2, icon: TrendingUp,   color: "bg-emerald-500",  textColor: "text-white",       sub: "Running smoothly" },
-  { label: "In Review",      value: 2, icon: Clock,        color: "bg-amber-400",    textColor: "text-white",       sub: "Needs attention" },
-  { label: "Completed",      value: 1, icon: CheckCircle2, color: "bg-violet-500",   textColor: "text-white",       sub: "Delivered" },
-  { label: "Blocked",        value: 1, icon: AlertTriangle,color: "bg-red-500",      textColor: "text-white",       sub: "Action required" },
-];  
+// const STAT_CONFIG = [
+//   { label: "Total Projects", key: 'total', icon: FolderKanban, color: "bg-gray-900", textColor: "text-white", sub: "All time" },
+//   { label: "Active", key: 'active', icon: TrendingUp, color: "bg-emerald-500", textColor: "text-white", sub: "Running smoothly" },
+//   { label: "In Review", key: 'inReview', icon: Clock, color: "bg-amber-400", textColor: "text-white", sub: "Needs attention" },
+//   { label: "Completed", key: 'completed', icon: CheckCircle2, color: "bg-violet-500", textColor: "text-white", sub: "Delivered" },
+//   { label: "Blocked", key: 'blocked', icon: AlertTriangle, color: "bg-red-500", textColor: "text-white", sub: "Action required" },
+// ];
 
 // ─── Sidebar Nav Items ─────────────────────────────────────────────────────────
 const NAV_TOP = [
-//   { label: "Booking", icon: BookOpen },
-//   { label: "File",    icon: FileText },
-//   { label: "Course",  icon: BookOpen },
+  //   { label: "Booking", icon: BookOpen },
+  //   { label: "File",    icon: FileText },
+  //   { label: "Course",  icon: BookOpen },
 ];
 
 const NAV_MANAGEMENT = [
@@ -112,23 +48,18 @@ const NAV_MANAGEMENT = [
     icon: FolderKanban,
     active: true,
   },
-  { label: "User",    icon: Users },
+  { label: "User", icon: Users },
 ];
 
 // ─── Sidebar Item ──────────────────────────────────────────────────────────────
-function SidebarItem({ item, defaultOpen = false }) {
-  const [open, setOpen] = useState();
-//   const hasChildren = item.children && item.children.length > 0;
-
+function SidebarItem({ item }) {
   return (
     <div>
       <button
-        // onClick={() => hasChildren && setOpen((v) => !v)}
-        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
-          item.active
-            ? "bg-emerald-50 text-emerald-700"
-            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-        }`}
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${item.active
+          ? "bg-emerald-50 text-emerald-700"
+          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          }`}
       >
         <item.icon
           size={17}
@@ -136,39 +67,44 @@ function SidebarItem({ item, defaultOpen = false }) {
         />
         <span className="flex-1 text-left">{item.label}</span>
       </button>
-{/* 
-      <AnimatePresence initial={false}>
-        {open && hasChildren && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <div className="ml-8 mt-0.5 space-y-0.5 border-l border-gray-100 pl-3">
-              {item.children.map((child) => (
-                <button
-                  key={child}
-                  className={`w-full text-left text-sm py-1.5 px-2 rounded-lg transition-colors ${
-                    child === "List"
-                      ? "text-gray-900 font-semibold bg-gray-100"
-                      : "text-gray-500 hover:text-gray-800 hover:bg-gray-50 font-medium"
-                  }`}
-                >
-                  {child}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence> */}
     </div>
   );
 }
 
-// ─── Edit Modal ────────────────────────────────────────────────────────────────
-function EditModal({ project, onClose }) {
+// ─── Project Modal (Create/Edit) ────────────────────────────────────────────────
+function ProjectModal({ project, onClose, onSave }) {
+  const [formData, setFormData] = useState(
+    project || {
+      name: "",
+      description: "",
+      developers: "",
+      testers: "",
+      status: "pending",
+    }
+  );
+
+  useEffect(() => {
+    if (project) {
+      setFormData({
+        ...project,
+        developers: Array.isArray(project.developers) ? project.developers.join(", ") : project.developers,
+        testers: Array.isArray(project.testers) ? project.testers.join(", ") : project.testers,
+      });
+    }
+  }, [project]);
+
+  const isEdit = !!project?._id || !!project?.id;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const dataToSend = {
+      ...formData,
+      developers: typeof formData.developers === 'string' ? formData.developers.split(",").map(s => s.trim()).filter(Boolean) : formData.developers,
+      testers: typeof formData.testers === 'string' ? formData.testers.split(",").map(s => s.trim()).filter(Boolean) : formData.testers,
+    };
+    onSave(dataToSend);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -185,44 +121,79 @@ function EditModal({ project, onClose }) {
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-gray-900">Edit Project</h2>
+          <h2 className="text-lg font-bold text-gray-900">{isEdit ? "Edit Project" : "Create Project"}</h2>
           <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
             <X size={16} className="text-gray-500" />
           </button>
         </div>
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="text-xs font-medium text-gray-600 block mb-1">Project Name</label>
-            <input defaultValue={project.name} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100" />
+            <input
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+            />
           </div>
           <div>
             <label className="text-xs font-medium text-gray-600 block mb-1">Description</label>
-            <textarea defaultValue={project.description} rows={3} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 resize-none" />
+            <textarea
+              required
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 resize-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-medium text-gray-600 block mb-1">Developers (comma separated)</label>
+              <input
+                value={formData.developers}
+                onChange={(e) => setFormData({ ...formData, developers: e.target.value })}
+                placeholder="Alice, Bob"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 block mb-1">Testers (comma separated)</label>
+              <input
+                value={formData.testers}
+                onChange={(e) => setFormData({ ...formData, testers: e.target.value })}
+                placeholder="Diana, Evan"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              />
+            </div>
           </div>
           <div>
             <label className="text-xs font-medium text-gray-600 block mb-1">Status</label>
-            <select defaultValue={project.status} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-emerald-400 bg-white">
-              {["Active", "In Review", "Pending", "Blocked", "Completed"].map((s) => (
-                <option key={s}>{s}</option>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-emerald-400 bg-white"
+            >
+              {["pending", "active", "inReview", "blocked", "completed"].map((s) => (
+                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
               ))}
             </select>
           </div>
-        </div>
-        <div className="flex gap-3 mt-6">
-          <button onClick={onClose} className="flex-1 border border-gray-200 text-gray-700 font-medium text-sm py-2.5 rounded-xl hover:bg-gray-50 transition-colors">
-            Cancel
-          </button>
-          <button onClick={onClose} className="flex-1 bg-gray-900 text-white font-semibold text-sm py-2.5 rounded-xl hover:bg-gray-800 transition-colors">
-            Save Changes
-          </button>
-        </div>
+          <div className="flex gap-3 mt-6">
+            <button type="button" onClick={onClose} className="flex-1 border border-gray-200 text-gray-700 font-medium text-sm py-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" className="flex-1 bg-gray-900 text-white font-semibold text-sm py-2.5 rounded-xl hover:bg-gray-800 transition-colors">
+              {isEdit ? "Save Changes" : "Create Project"}
+            </button>
+          </div>
+        </form>
       </motion.div>
     </motion.div>
   );
 }
 
 // ─── Delete Confirm Modal ──────────────────────────────────────────────────────
-function DeleteModal({ project, onClose }) {
+function DeleteModal({ project, onClose, onDelete }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -249,7 +220,7 @@ function DeleteModal({ project, onClose }) {
           <button onClick={onClose} className="flex-1 border border-gray-200 text-gray-700 font-medium text-sm py-2.5 rounded-xl hover:bg-gray-50 transition-colors">
             Cancel
           </button>
-          <button onClick={onClose} className="flex-1 bg-red-500 text-white font-semibold text-sm py-2.5 rounded-xl hover:bg-red-600 transition-colors">
+          <button onClick={() => onDelete(project._id || project.id)} className="flex-1 bg-red-500 text-white font-semibold text-sm py-2.5 rounded-xl hover:bg-red-600 transition-colors">
             Delete
           </button>
         </div>
@@ -331,23 +302,96 @@ function DeleteModal({ project, onClose }) {
 //   );
 // }
 
+
 // ─── MAIN DASHBOARD ────────────────────────────────────────────────────────────
 export default function ProjectsDashboard() {
-  const [projects, setProjects] = useState(MOCK_PROJECTS);
-  const [editProject, setEditProject]   = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editProject, setEditProject] = useState(null);
   const [deleteProject, setDeleteProject] = useState(null);
-  const [viewProject, setViewProject]   = useState(null);
+  const [viewProject, setViewProject] = useState(null);
+  const navigate = useNavigate();
 
-  const handleDelete = (p) => {
-    setDeleteProject(null);
-    setProjects((prev) => prev.filter((x) => x.id !== p.id));
+  const fetchProjects = async (isManual = false) => {
+    try {
+      if (isManual) setLoading(true);
+      const response = await projectService.getAllProjects();
+      if (response.success) {
+        setProjects(response.data);
+        if (isManual) toast.success(response.message || "Projects fetched successfully");
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to fetch projects");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchProjects(true);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; samesite=strict";
+      navigate("/signin");
+      toast.success("Logged out successfully");
+    } catch (error) {
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; samesite=strict";
+      navigate("/signin");
+    }
+  };
+
+  const handleSaveProject = async (data) => {
+    try {
+      let response;
+      if (data._id) {
+        response = await projectService.updateProject(data);
+      } else {
+        response = await projectService.createProject(data);
+      }
+
+      if (response.success) {
+        toast.success(response.message || "Project saved successfully");
+        setShowCreateModal(false);
+        setEditProject(null);
+        fetchProjects();
+      }
+    } catch (error) {
+      toast.error(error.message || "Operation failed");
+    }
+  };
+
+  const handleDeleteProject = async (id) => {
+    try {
+      const response = await projectService.deleteProject(id);
+      if (response.success) {
+        toast.success(response.message || "Project deleted");
+        setDeleteProject(null);
+        fetchProjects();
+      }
+    } catch (error) {
+      toast.error(error.message || "Delete failed");
+    }
+  };
+
+  const stats = [
+    { label: "Total Projects", value: projects.length, icon: FolderKanban, color: "bg-gray-900", textColor: "text-white", sub: "All time" },
+    { label: "Active", value: projects.filter(p => p.status === 'active').length, icon: TrendingUp, color: "bg-emerald-500", textColor: "text-white", sub: "Currently running" },
+    { label: "In Review", value: projects.filter(p => p.status === 'inReview').length, icon: Clock, color: "bg-amber-400", textColor: "text-white", sub: "Awaiting feedback" },
+    { label: "Completed", value: projects.filter(p => p.status === 'completed').length, icon: CheckCircle2, color: "bg-violet-500", textColor: "text-white", sub: "Finalized" },
+    { label: "Blocked", value: projects.filter(p => p.status === 'blocked').length, icon: AlertTriangle, color: "bg-red-500", textColor: "text-white", sub: "Needs action" },
+  ];
+
+  const NAV_MANAGEMENT = [
+    { label: "Projects", icon: FolderKanban, active: true },
+    { label: "User", icon: Users },
+  ];
+
   return (
-    <div
-      className="flex h-screen bg-gray-50 overflow-hidden"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
-    >
+    <div className="flex h-screen bg-gray-50 overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {/* ── SIDEBAR ── */}
       <motion.aside
         initial={{ x: -20, opacity: 0 }}
@@ -355,7 +399,6 @@ export default function ProjectsDashboard() {
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="w-60 bg-white border-r border-gray-100 flex flex-col h-full flex-shrink-0 shadow-sm"
       >
-        {/* Logo */}
         <div className="p-5 border-b border-gray-100">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 shadow flex items-center justify-center">
@@ -364,41 +407,16 @@ export default function ProjectsDashboard() {
             <span className="font-bold text-gray-900 text-sm tracking-tight">Testing Zone</span>
           </div>
         </div>
-
-        {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          {/* Top links */}
-          {/* {NAV_TOP.map((item) => (
-            <button
-              key={item.label}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all"
-            >
-              <item.icon size={17} className="text-gray-400" />
-              {item.label}
-            </button>
-          ))} */}
-
-          {/* Management section */}
           <div className="pt-4 pb-1">
-            {/* <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">
-              Management
-            </p> */}
             {NAV_MANAGEMENT.map((item) => (
-              <SidebarItem
-                key={item.label}
-                item={item}
-                defaultOpen={item.active}
-              />
+              <SidebarItem key={item.label} item={item} />
             ))}
           </div>
         </nav>
-
-        {/* User footer */}
         <div className="p-3 border-t border-gray-100">
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 transition-colors group">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-              A
-            </div>
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 transition-colors group">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">A</div>
             <div className="flex-1 text-left min-w-0">
               <p className="text-xs font-semibold text-gray-900 truncate">Admin User</p>
               <p className="text-[10px] text-gray-400 truncate">admin@projecthub.io</p>
@@ -440,7 +458,7 @@ export default function ProjectsDashboard() {
         <main className="flex-1 overflow-y-auto px-8 py-6">
           {/* Stat Cards */}
           <div className="grid grid-cols-5 gap-4 mb-7">
-            {STATS.map((s, i) => (
+            {stats.map((s, i) => (
               <motion.div
                 key={s.label}
                 initial={{ opacity: 0, y: 16 }}
@@ -459,17 +477,14 @@ export default function ProjectsDashboard() {
           </div>
 
           {/* Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.4 }}>
             <ProjectsTable
               projects={projects}
               onEdit={(p) => setEditProject(p)}
               onDelete={(p) => setDeleteProject(p)}
               onView={(p) => setViewProject(p)}
-              onAddProject={() => alert("Open Add Project modal")}
+              onAddProject={() => setShowCreateModal(true)}
+              loading={loading}
             />
           </motion.div>
         </main>
@@ -477,14 +492,21 @@ export default function ProjectsDashboard() {
 
       {/* ── MODALS ── */}
       <AnimatePresence>
-        {editProject && (
-          <EditModal key="edit" project={editProject} onClose={() => setEditProject(null)} />
+        {(showCreateModal || editProject) && (
+          <ProjectModal
+            key="modal"
+            project={editProject}
+            onClose={() => { setShowCreateModal(false); setEditProject(null); }}
+            onSave={handleSaveProject}
+          />
         )}
         {deleteProject && (
-          <DeleteModal key="delete" project={deleteProject} onClose={() => handleDelete(deleteProject)} />
-        )}
-        {viewProject && (
-          <ViewDrawer key="view" project={viewProject} onClose={() => setViewProject(null)} />
+          <DeleteModal
+            key="delete"
+            project={deleteProject}
+            onClose={() => setDeleteProject(null)}
+            onDelete={handleDeleteProject}
+          />
         )}
       </AnimatePresence>
     </div>
