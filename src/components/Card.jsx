@@ -6,26 +6,26 @@ import { AlignLeft, Layers, Flame, Pencil, Trash2 } from 'lucide-react';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG = {
-  active:    { label: 'Active',    dot: '#10b981', bg: '#f0fdf8', border: '#a7f3d0', text: '#065f46' },
+  active: { label: 'Active', dot: '#10b981', bg: '#f0fdf8', border: '#a7f3d0', text: '#065f46' },
   completed: { label: 'Completed', dot: '#8b5cf6', bg: '#f5f3ff', border: '#ddd6fe', text: '#4c1d95' },
   in_review: { label: 'In Review', dot: '#f59e0b', bg: '#fffbeb', border: '#fde68a', text: '#78350f' },
-  pending:   { label: 'Pending',   dot: '#3b82f6', bg: '#eff6ff', border: '#bfdbfe', text: '#1e3a8a' },
-  blocked:   { label: 'Blocked',   dot: '#ef4444', bg: '#fef2f2', border: '#fecaca', text: '#7f1d1d' },
+  pending: { label: 'Pending', dot: '#3b82f6', bg: '#eff6ff', border: '#bfdbfe', text: '#1e3a8a' },
+  blocked: { label: 'Blocked', dot: '#ef4444', bg: '#fef2f2', border: '#fecaca', text: '#7f1d1d' },
 };
 
 const PRIORITY_CONFIG = {
   critical: { label: 'Critical', color: '#ef4444', bg: '#fef2f2' },
-  high:     { label: 'High',     color: '#f97316', bg: '#fff7ed' },
-  medium:   { label: 'Medium',   color: '#f59e0b', bg: '#fffbeb' },
-  low:      { label: 'Low',      color: '#10b981', bg: '#f0fdf8' },
+  high: { label: 'High', color: '#f97316', bg: '#fff7ed' },
+  medium: { label: 'Medium', color: '#f59e0b', bg: '#fffbeb' },
+  low: { label: 'Low', color: '#10b981', bg: '#f0fdf8' },
 };
 
 const TYPE_CONFIG = {
-  feature:     { label: 'Feature',     color: '#10b981', bg: '#f0fdf8' },
-  bug:         { label: 'Bug Fix',     color: '#ef4444', bg: '#fef2f2' },
+  feature: { label: 'Feature', color: '#10b981', bg: '#f0fdf8' },
+  bug: { label: 'Bug Fix', color: '#ef4444', bg: '#fef2f2' },
   improvement: { label: 'Improvement', color: '#3b82f6', bg: '#eff6ff' },
-  task:        { label: 'Task',        color: '#8b5cf6', bg: '#f5f3ff' },
-  research:    { label: 'Research',    color: '#f59e0b', bg: '#fffbeb' },
+  task: { label: 'Task', color: '#8b5cf6', bg: '#f5f3ff' },
+  research: { label: 'Research', color: '#f59e0b', bg: '#fffbeb' },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -81,27 +81,29 @@ const MetaRow = ({ icon: Icon, label, children }) => (
  *   status       'active' | 'completed' | 'in_review' | 'pending' | 'blocked'
  *   onEdit       () => void
  *   onDelete     () => void
+ *   onClick      () => void
  *   index        number   ← stagger animation ke liye
  */
 const FeatureCard = ({
-  featureName  = 'Untitled Feature',
-  projectName  = 'Unknown Project',
-  description  = 'No description provided.',
-  type         = 'feature',
-  priority     = 'medium',
-  status       = 'pending',
-  onEdit       = () => {},
-  onDelete     = () => {},
-  index        = 0,
+  featureName = 'Untitled Feature',
+  projectName = 'Unknown Project',
+  description = 'No description provided.',
+  type = 'feature',
+  priority = 'medium',
+  status = 'pending',
+  onEdit = () => { },
+  onDelete = () => { },
+  onClick = () => { },
+  index = 0,
 }) => {
-  const statusCfg   = STATUS_CONFIG[status]     || STATUS_CONFIG.pending;
+  const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
   const priorityCfg = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.medium;
-  const typeCfg     = TYPE_CONFIG[type]         || TYPE_CONFIG.feature;
+  const typeCfg = TYPE_CONFIG[type] || TYPE_CONFIG.feature;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 18, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0,  scale: 1    }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.38, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{
         y: -3,
@@ -109,10 +111,11 @@ const FeatureCard = ({
         transition: { duration: 0.2, ease: 'easeOut' },
       }}
       className="relative bg-white rounded-2xl border overflow-hidden cursor-pointer h-auto width-20"
+      onClick={onClick}
       style={{
         borderColor: '#e5e7eb',
-        boxShadow:   '0 1px 4px rgba(0,0,0,0.05)',
-        fontFamily:  "'DM Sans', sans-serif",
+        boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+        fontFamily: "'DM Sans', sans-serif",
       }}
     >
       {/* Left accent bar — color matches status */}
@@ -220,7 +223,7 @@ const FeatureCard = ({
  *     onDelete={(id) => handleDelete(id)}
  *   />
  */
-export const FeatureCardGrid = ({ features = [], onEdit, onDelete }) => {
+export const FeatureCardGrid = ({ features = [], onEdit, onDelete, onCardClick }) => {
   return (
     <div
       /*
@@ -248,7 +251,7 @@ export const FeatureCardGrid = ({ features = [], onEdit, onDelete }) => {
           // flex-shrink-0 → card apni width se chhota nahi hoga
           // w calculations → exactly 3 per row on lg, 2 on sm, 1 on mobile
           style={{
-            flexGrow:   0,           // ← KEY: never stretch to fill empty space
+            flexGrow: 0,           // ← KEY: never stretch to fill empty space
             flexShrink: 0,
           }}
           className="
@@ -267,6 +270,7 @@ export const FeatureCardGrid = ({ features = [], onEdit, onDelete }) => {
             status={feature.status}
             onEdit={() => onEdit?.(feature.id)}
             onDelete={() => onDelete?.(feature.id)}
+            onClick={() => onCardClick?.(feature.id)}
           />
         </div>
       ))}

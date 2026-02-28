@@ -170,10 +170,14 @@ export default function ProjectsTable({
   const roleRef = useRef(null);
 
   const navigate = useNavigate()
-  const detailPage = () => {
-    navigate('/project-features')
+  const detailPage = (project) => {
+    navigate('/project-features', {
+      state: {
+        projectId: project._id || project.id,
+        projectName: project.name,
+      }
+    })
   }
-// /' + (selected.values().next().value || projects[0]?._id || projects[0]?.id) 
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab, search, roleFilter]);
@@ -437,7 +441,7 @@ export default function ProjectsTable({
                             {project.name?.charAt(0)}
                           </div>
                           <div>
-                            <p><a onClick={detailPage}  className="text-sm font-semibold text-gray-900 leading-tight cursor-pointer">{project.name}</a></p>
+                            <p><a onClick={() => detailPage(project)} className="text-sm font-semibold text-gray-900 leading-tight cursor-pointer">{project.name}</a></p>
                             {/* <p className="text-xs text-gray-400 mt-0.5">ID #{String(project._id || project.id).slice(-4).toUpperCase()}</p> */}
                           </div>
                         </div>
@@ -486,7 +490,7 @@ export default function ProjectsTable({
                           <RowActions
                             onEdit={() => onEdit?.(project)}
                             onDelete={() => onDelete?.(project)}
-                            // onView={() => onView?.(project)}
+                          // onView={() => onView?.(project)}
                           />
                         </div>
                       </td>

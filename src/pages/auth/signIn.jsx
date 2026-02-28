@@ -53,7 +53,7 @@ export default function SignIn() {
         // Store token in cookies for frontend route protection
         const token = response.data?.token;
         if (token) {
-          document.cookie = `token=${token}; path=/; max-age=${2 * 24 * 60 * 60}; samesite=strict`;
+          document.cookie = `authToken=${token}; path=/; max-age=${2 * 24 * 60 * 60}; samesite=strict`;
         }
         navigate("/dashboard");
       }

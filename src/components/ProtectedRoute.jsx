@@ -7,7 +7,7 @@ const ProtectedRoute = ({ children }) => {
         if (parts.length === 2) return parts.pop().split(';').shift();
     };
 
-    const token = getCookie("token");
+    const token = getCookie("authToken");
 
     if (!token) {
         return <Navigate to="/signin" replace />;

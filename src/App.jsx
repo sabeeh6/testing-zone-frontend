@@ -4,6 +4,8 @@ import SignUp from "./pages/auth/signUp";
 import ProjectsDashboard from "./pages/ProjectDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Features } from "./pages/Features";
+import { FeatureDetail } from "./pages/FeatureDetail";
+import Layout from "./components/Layout";
 
 export default function App() {
   return (
@@ -11,8 +13,14 @@ export default function App() {
       <Routes>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<ProtectedRoute><ProjectsDashboard /></ProtectedRoute>} />
-        <Route path="/project-features" element={<ProtectedRoute><Features /></ProtectedRoute>} />
+
+        {/* Authenticated Routes with Persistent Layout */}
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route path="/dashboard" element={<ProjectsDashboard />} />
+          <Route path="/project-features" element={<Features />} />
+          <Route path="/features/:id" element={<FeatureDetail />} />
+        </Route>
+
         <Route path="*" element={<Navigate to="/signin" replace />} />
       </Routes>
     </BrowserRouter>
