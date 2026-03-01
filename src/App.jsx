@@ -5,6 +5,8 @@ import ProjectsDashboard from "./pages/ProjectDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Features } from "./pages/Features";
 import { FeatureDetail } from "./pages/FeatureDetail";
+import { TestCasesPage } from "./pages/TestCasesPage";
+import { TestCaseDetail } from "./pages/TestCaseDetail";
 import Layout from "./components/Layout";
 
 export default function App() {
@@ -19,6 +21,8 @@ export default function App() {
           <Route path="/dashboard" element={<ProjectsDashboard />} />
           <Route path="/project-features" element={<Features />} />
           <Route path="/features/:id" element={<FeatureDetail />} />
+          <Route path="/features/:id/testcases" element={<TestCasesPage />} />
+          <Route path="/projects/:projectId/features/:featureId/testcases/:testCaseId" element={<TestCaseDetail />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/signin" replace />} />
