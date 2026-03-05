@@ -1,20 +1,11 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "public": "dist",
-  "routes": [
+  "outputDirectory": "dist",
+  "rewrites": [
     {
-      "src": "/index.html",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html",
-      "status": 200
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
