@@ -26,33 +26,55 @@ import toast from "react-hot-toast";
 const API_BASE_URL = "http://localhost:5000";
 
 // ─── Evidence Thumbnail Component ─────────────────────────────────────────────
-const EvidenceThumbnail = ({ item, onDelete }) => (
-    <div className="relative group w-full aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-all hover:shadow-md">
-        <img
-            src={item.fileUrl && item.fileUrl[0]}
-            alt="Evidence"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-            <button
-                onClick={() => onDelete(item._id)}
-                className="p-2 bg-white/20 backdrop-blur-md rounded-xl text-white hover:bg-red-500 transition-colors"
-                title="Delete Evidence"
-            >
-                <Trash2 size={16} />
-            </button>
-            <a
-                href={item.fileUrl && item.fileUrl[0]}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 bg-white/20 backdrop-blur-md rounded-xl text-white hover:bg-emerald-500 transition-colors"
-                title="View Full Size"
-            >
-                <Upload size={16} className="rotate-180" />
-            </a>
+// ─── Evidence Thumbnail Component ─────────────────────────────────────────────
+const EvidenceThumbnail = ({ item, onDelete }) => {
+    const isVideo = item.fileType && item.fileType[0] === 'video';
+    const fileUrl = item.fileUrl && item.fileUrl[0];
+
+    return (
+        <div className="relative group w-full aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-all hover:shadow-md">
+            {isVideo ? (
+                <div className="w-full h-full flex items-center justify-center bg-gray-900 border border-gray-800">
+                    <video
+                        src={fileUrl}
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                        muted
+                        playsInline
+                        onMouseOver={(e) => e.target.play()}
+                        onMouseOut={(e) => { e.target.pause(); e.target.currentTime = 0; }}
+                    />
+                    <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[8px] font-black uppercase px-2 py-1 rounded-md z-10">
+                        Video
+                    </div>
+                </div>
+            ) : (
+                <img
+                    src={fileUrl}
+                    alt="Evidence"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+            )}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-20">
+                <button
+                    onClick={() => onDelete(item._id)}
+                    className="p-2 bg-white/20 backdrop-blur-md rounded-xl text-white hover:bg-red-500 transition-colors"
+                    title="Delete Evidence"
+                >
+                    <Trash2 size={16} />
+                </button>
+                <a
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 bg-white/20 backdrop-blur-md rounded-xl text-white hover:bg-emerald-500 transition-colors"
+                    title={isVideo ? "Watch Video" : "View Full Size"}
+                >
+                    <Upload size={16} className="rotate-180" />
+                </a>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 // ─── Status Toggle Component ───────────────────────────────────────────────────
 const Switch = ({ enabled, onChange, label, description }) => (
@@ -260,7 +282,7 @@ export const TestCaseDetail = () => {
                 type="file"
                 id="evidence-upload"
                 className="hidden"
-                accept="image/*"
+                accept="image/*,video/*"
                 onChange={handleFileUpload}
             />
 
@@ -299,7 +321,7 @@ export const TestCaseDetail = () => {
                             </div>
                             <div className="text-center px-6">
                                 <p className="text-sm font-bold text-gray-900">Reference Evidence</p>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">allowed .jpg, .png, .gif (max 10mb)</p>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">allowed .jpg, .png, .mp4, .mov (max 50mb)</p>
                             </div>
                         </div>
 
