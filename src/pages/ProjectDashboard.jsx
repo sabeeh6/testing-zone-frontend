@@ -114,7 +114,7 @@ function ProjectModal({ project, onClose, onSave }) {
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-emerald-400 bg-white"
             >
-              {["Pending", "Active", "In Review", "Blocked", "Completed"].map((s) => (
+              {["pending", "active", "inReview", "blocked", "completed"].map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>

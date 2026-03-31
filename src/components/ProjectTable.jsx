@@ -36,7 +36,7 @@ export function StatusBadge({ status }) {
       {status}
     </span>
   );
-}
+} 
 
 // ─── Avatar Stack ──────────────────────────────────────────────────────────────
 function AvatarStack({ people = [], max = 3 }) {
@@ -259,7 +259,7 @@ export default function ProjectsTable({
       </div>
 
       {/* ── Status Tabs ── */}
-      <div className="flex items-center gap-1 mb-5 border-b border-gray-100 pb-0">
+      {/* <div className="flex items-center gap-1 mb-5 border-b border-gray-100 pb-0">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab}
@@ -282,12 +282,12 @@ export default function ProjectsTable({
             )}
           </button>
         ))}
-      </div>
+      </div> */}
 
       {/* ── Filters row ── */}
       <div className="flex items-center gap-3 mb-4">
         {/* Role dropdown */}
-        <div className="relative" ref={roleRef}>
+        {/* <div className="relative" ref={roleRef}>
           <button
             onClick={() => setRoleOpen((v) => !v)}
             className="flex items-center gap-2 text-sm text-gray-600 border border-gray-200 bg-white px-3.5 py-2 rounded-lg hover:border-gray-300 transition-colors min-w-[120px] justify-between"
@@ -315,7 +315,7 @@ export default function ProjectsTable({
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </div> */}
 
         {/* Search */}
         <div className="flex-1 relative">

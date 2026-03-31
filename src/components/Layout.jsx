@@ -22,10 +22,10 @@ function SidebarItem({ item, onClick }) {
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     }`}
             >
-                <item.icon
+                {/* <item.icon
                     size={17}
                     className={item.active ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-700"}
-                />
+                /> */}
                 <span className="flex-1 text-left">{item.label}</span>
             </button>
         </div>
@@ -56,7 +56,7 @@ export default function Layout() {
             path: "/dashboard"
         },
         {
-            label: "User",
+            // label: "User",
             icon: Users,
             active: location.pathname === "/users",
             path: "/users"
