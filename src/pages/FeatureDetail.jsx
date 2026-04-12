@@ -66,7 +66,7 @@ export const FeatureDetail = () => {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-gray-400">
                 <div className="w-12 h-12 border-4 border-gray-100 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
-                <p className="text-sm font-bold tracking-widest uppercase opacity-50">Loading Metadata...</p>
+                <p className="text-sm font-bold tracking-wider uppercase opacity-50">Loading Metadata...</p>
             </div>
         );
     }
@@ -75,7 +75,7 @@ export const FeatureDetail = () => {
     const priorityStyle = getPriorityStyles(feature?.priority);
 
     return (
-        <div className="px-8 py-8 max-w-5xl mx-auto" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        <div className="px-8 py-8 max-w-5xl mx-auto">
             {/* Navigation */}
             <button
                 onClick={() => navigate(-1)}
@@ -96,20 +96,20 @@ export const FeatureDetail = () => {
                     <div className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm shadow-gray-100/50">
                         <div className="flex flex-wrap items-center gap-3 mb-6">
                             <span
-                                className="px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-[0.1em] border"
+                                className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border"
                                 style={{ background: statusStyle.bg, color: statusStyle.text, borderColor: statusStyle.dot + '20' }}
                             >
                                 {statusStyle.label}
                             </span>
                             <span
-                                className="px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-[0.1em] border"
+                                className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border"
                                 style={{ background: priorityStyle.bg, color: priorityStyle.color, borderColor: priorityStyle.color + '20' }}
                             >
                                 {priorityStyle.label} Priority
                             </span>
                         </div>
 
-                        <h1 className="text-4xl font-extrabold text-gray-900 leading-tight mb-6">
+                        <h1 className="text-4xl font-bold text-gray-900 leading-tight mb-6">
                             {feature?.name}
                         </h1>
 
@@ -123,7 +123,7 @@ export const FeatureDetail = () => {
                                     <Layers size={22} />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 mb-1">Feature Type</p>
+                                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Feature Type</p>
                                     <p className="text-sm font-bold text-gray-900">{feature?.type?.charAt(0).toUpperCase() + feature?.type?.slice(1)}</p>
                                 </div>
                             </div>
@@ -133,7 +133,7 @@ export const FeatureDetail = () => {
                                     <Calendar size={22} />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 mb-1">Created Date</p>
+                                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Created Date</p>
                                     <p className="text-sm font-bold text-gray-900">{new Date(feature?.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                                 </div>
                             </div>
@@ -166,7 +166,7 @@ export const FeatureDetail = () => {
                 >
                     {/* Actions Card */}
                     <div className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
-                        <h4 className="text-[11px] font-black uppercase tracking-[0.15em] text-gray-400 mb-6">Management</h4>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-6">Management</h4>
                         <div className="space-y-3">
                             <button className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-gray-50 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 font-bold transition-all group">
                                 <div className="flex items-center gap-3">
@@ -187,14 +187,14 @@ export const FeatureDetail = () => {
 
                     {/* Metadata Card */}
                     <div className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
-                        <h4 className="text-[11px] font-black uppercase tracking-[0.15em] text-gray-400 mb-6">Timeline</h4>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-6">Timeline</h4>
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
                                     <Clock size={16} />
                                 </div>
                                 <div>
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Last Updated</p>
+                                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Last Updated</p>
                                     <p className="text-xs font-bold text-gray-900">{new Date(feature?.updatedAt).toLocaleString()}</p>
                                 </div>
                             </div>
@@ -203,7 +203,7 @@ export const FeatureDetail = () => {
                                     <CheckCircle2 size={16} />
                                 </div>
                                 <div>
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Project</p>
+                                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Project</p>
                                     <p className="text-xs font-bold text-gray-900">{feature?.projectId?.name}</p>
                                 </div>
                             </div>

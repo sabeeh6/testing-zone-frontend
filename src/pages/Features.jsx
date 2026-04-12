@@ -58,7 +58,7 @@ function FeatureModal({ feature, onClose, onSave, isSaving }) {
           <div className="space-y-4">
             {/* Feature Name */}
             <div>
-              <label className="text-[11px] uppercase tracking-widest font-bold text-gray-400 block mb-1.5 ml-1">Feature Name</label>
+              <label className="text-xs uppercase tracking-wider font-bold text-gray-400 block mb-1.5 ml-1">Feature Name</label>
               <input
                 required
                 value={formData.name}
@@ -70,7 +70,7 @@ function FeatureModal({ feature, onClose, onSave, isSaving }) {
 
             {/* Description */}
             <div>
-              <label className="text-[11px] uppercase tracking-widest font-bold text-gray-400 block mb-1.5 ml-1">Description</label>
+              <label className="text-xs uppercase tracking-wider font-bold text-gray-400 block mb-1.5 ml-1">Description</label>
               <textarea
                 required
                 value={formData.description}
@@ -84,7 +84,7 @@ function FeatureModal({ feature, onClose, onSave, isSaving }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Type */}
               <div>
-                <label className="text-[11px] uppercase tracking-widest font-bold text-gray-400 block mb-1.5 ml-1">Type</label>
+                <label className="text-xs uppercase tracking-wider font-bold text-gray-400 block mb-1.5 ml-1">Type</label>
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
@@ -98,7 +98,7 @@ function FeatureModal({ feature, onClose, onSave, isSaving }) {
 
               {/* Priority */}
               <div>
-                <label className="text-[11px] uppercase tracking-widest font-bold text-gray-400 block mb-1.5 ml-1">Priority</label>
+                <label className="text-xs uppercase tracking-wider font-bold text-gray-400 block mb-1.5 ml-1">Priority</label>
                 <select
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
@@ -113,7 +113,7 @@ function FeatureModal({ feature, onClose, onSave, isSaving }) {
 
             {/* Status */}
             <div>
-              <label className="text-[11px] uppercase tracking-widest font-bold text-gray-400 block mb-1.5 ml-1">Status</label>
+              <label className="text-xs uppercase tracking-wider font-bold text-gray-400 block mb-1.5 ml-1">Status</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {['pending', 'inReview', 'active', 'completed', 'blocked'].map((s) => (
                   <button
@@ -295,14 +295,14 @@ export const Features = () => {
   };
 
   return (
-    <div className="px-8 py-6 min-h-screen bg-gray-50/30" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="px-8 py-6 min-h-screen bg-gray-50/30">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Project Features</h1>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Project Features</h1>
           <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
             <span onClick={() => navigate("/dashboard")} className="hover:text-emerald-600 cursor-pointer transition-colors">Dashboard</span>
             <span className="text-gray-300">/</span>

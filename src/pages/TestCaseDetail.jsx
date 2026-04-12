@@ -43,7 +43,7 @@ const EvidenceThumbnail = ({ item, onDelete }) => {
                         onMouseOver={(e) => e.target.play()}
                         onMouseOut={(e) => { e.target.pause(); e.target.currentTime = 0; }}
                     />
-                    <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[8px] font-black uppercase px-2 py-1 rounded-md z-10">
+                    <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold uppercase px-2 py-1 rounded-md z-10">
                         Video
                     </div>
                 </div>
@@ -81,7 +81,7 @@ const Switch = ({ enabled, onChange, label, description }) => (
     <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50">
         <div className="space-y-0.5">
             <p className="text-sm font-bold text-gray-900">{label}</p>
-            {description && <p className="text-[10px] text-gray-400 font-medium leading-tight">{description}</p>}
+            {description && <p className="text-xs text-gray-400 font-semibold leading-tight">{description}</p>}
         </div>
         <button
             onClick={() => onChange(!enabled)}
@@ -120,7 +120,7 @@ const ExecutionToggle = ({ status, onChange }) => {
                     <button
                         key={opt.value}
                         onClick={() => onChange(opt.value)}
-                        className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-[11px] font-black uppercase tracking-wider transition-all ${colorClass}`}
+                        className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-xs font-bold uppercase tracking-wide transition-all ${colorClass}`}
                     >
                         <opt.icon size={14} />
                         {opt.label}
@@ -275,7 +275,7 @@ export const TestCaseDetail = () => {
     );
 
     return (
-        <div className="p-8 max-w-[1600px] mx-auto space-y-8" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        <div className="p-8 max-w-[1600px] mx-auto space-y-8">
 
             {/* Hidden File Input */}
             <input
@@ -288,8 +288,8 @@ export const TestCaseDetail = () => {
 
             {/* Header breadcrumbs */}
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-black text-gray-900">Scenario Configuration</h1>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400">
+                <h1 className="text-2xl font-bold text-gray-900">Scenario Configuration</h1>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                     <span>Dashboard</span>
                     <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                     <span>{testCase?.featureId?.projectId?.name || "Project"}</span>
@@ -312,7 +312,7 @@ export const TestCaseDetail = () => {
                             {isUploading && (
                                 <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-3">
                                     <div className="w-10 h-10 border-4 border-emerald-100 border-t-emerald-500 rounded-full animate-spin" />
-                                    <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest">Uploading...</p>
+                                    <p className="text-xs font-bold uppercase text-emerald-600 tracking-wider">Uploading...</p>
                                 </div>
                             )}
 
@@ -321,14 +321,14 @@ export const TestCaseDetail = () => {
                             </div>
                             <div className="text-center px-6">
                                 <p className="text-sm font-bold text-gray-900">Reference Evidence</p>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">allowed .jpg, .png, .mp4, .mov (max 50mb)</p>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">allowed .jpg, .png, .mp4, .mov (max 50mb)</p>
                             </div>
                         </div>
 
                         {/* Evidence Gallery */}
                         {evidences.length > 0 && (
                             <div className="w-full space-y-3">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Evidence Gallery ({evidences.length})</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Evidence Gallery ({evidences.length})</label>
                                 <div className="grid grid-cols-3 gap-3">
                                     {evidences.map((ev) => (
                                         <EvidenceThumbnail
@@ -350,7 +350,7 @@ export const TestCaseDetail = () => {
                             />
 
                             <div className="space-y-3 pt-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Execution Status</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Execution Status</label>
                                 <ExecutionToggle
                                     status={formData.status}
                                     onChange={(val) => handleInputChange('status', val)}
@@ -366,7 +366,7 @@ export const TestCaseDetail = () => {
 
                         {/* Field: Title */}
                         <div className="md:col-span-2 space-y-2">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Scenario Title</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Scenario Title</label>
                             <div className="relative group">
                                 <FlaskConical className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-emerald-500 transition-colors" size={18} />
                                 <input
@@ -381,7 +381,7 @@ export const TestCaseDetail = () => {
 
                         {/* Read-only: Feature & Project */}
                         <div className="space-y-2">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Feature Scope</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Feature Scope</label>
                             <div className="px-6 py-4 bg-gray-50 rounded-[1.25rem] text-sm font-bold text-gray-400 flex items-center gap-3">
                                 <ShieldCheck size={18} className="opacity-40" />
                                 {testCase?.featureId?.name || "N/A"}
@@ -389,7 +389,7 @@ export const TestCaseDetail = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Project Context</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Project Context</label>
                             <div className="px-6 py-4 bg-gray-50 rounded-[1.25rem] text-sm font-bold text-gray-400 flex items-center gap-3">
                                 <FileText size={18} className="opacity-40" />
                                 {testCase?.featureId?.projectId?.name || "N/A"}
@@ -398,7 +398,7 @@ export const TestCaseDetail = () => {
 
                         {/* Selects: Priority & Severity */}
                         <div className="space-y-2">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Test Priority</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Test Priority</label>
                             <select
                                 value={formData.priority}
                                 onChange={(e) => handleInputChange('priority', e.target.value)}
@@ -412,7 +412,7 @@ export const TestCaseDetail = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Test Severity</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Test Severity</label>
                             <select
                                 value={formData.severity}
                                 onChange={(e) => handleInputChange('severity', e.target.value)}
@@ -427,7 +427,7 @@ export const TestCaseDetail = () => {
 
                         {/* Textarea: Preconditions */}
                         <div className="md:col-span-2 space-y-2">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Prerequisites & Environment</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Prerequisites & Environment</label>
                             <textarea
                                 value={formData.preconditions}
                                 onChange={(e) => handleInputChange('preconditions', e.target.value)}
@@ -440,20 +440,20 @@ export const TestCaseDetail = () => {
                         {/* Step list */}
                         <div className="md:col-span-2 space-y-4 pt-4 border-t border-gray-50 mt-4">
                             <div className="flex items-center justify-between ml-1">
-                                <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Execution Protocol</label>
-                                <button onClick={addStep} className="text-[10px] font-black uppercase text-emerald-600 hover:text-emerald-700 underline underline-offset-4 tracking-tighter">Extend Steps</button>
+                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Execution Protocol</label>
+                                <button onClick={addStep} className="text-xs font-bold uppercase text-emerald-600 hover:text-emerald-700 underline underline-offset-4 tracking-wider">Extend Steps</button>
                             </div>
                             <div className="space-y-3">
                                 {formData.steps?.map((step, idx) => (
                                     <div key={idx} className="flex gap-4 group">
-                                        <div className="w-12 h-12 shrink-0 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center text-[11px] font-black text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-colors">
+                                        <div className="w-12 h-12 shrink-0 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center text-xs font-bold text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-colors">
                                             {String(idx + 1).padStart(2, '0')}
                                         </div>
                                         <input
                                             type="text"
                                             value={step}
                                             onChange={(e) => handleStepChange(idx, e.target.value)}
-                                            className="flex-1 px-6 bg-gray-50/50 border border-transparent rounded-2xl text-[13px] font-bold focus:bg-white focus:border-emerald-100 focus:ring-4 focus:ring-emerald-50 transition-all outline-none"
+                                            className="flex-1 px-6 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-medium focus:bg-white focus:border-emerald-100 focus:ring-4 focus:ring-emerald-50 transition-all outline-none"
                                             placeholder={`Test step phase ${idx + 1}...`}
                                         />
                                         {formData.steps?.length > 1 && (
@@ -468,7 +468,7 @@ export const TestCaseDetail = () => {
 
                         {/* Results sections */}
                         <div className="space-y-2 pt-4">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Expected Outcome</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Expected Outcome</label>
                             <textarea
                                 value={formData.expectedResult}
                                 onChange={(e) => handleInputChange('expectedResult', e.target.value)}
@@ -479,7 +479,7 @@ export const TestCaseDetail = () => {
                         </div>
 
                         <div className="space-y-2 pt-4">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Actual Observation</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Actual Observation</label>
                             <textarea
                                 value={formData.actualResult}
                                 onChange={(e) => handleInputChange('actualResult', e.target.value)}
@@ -491,7 +491,7 @@ export const TestCaseDetail = () => {
 
                         {/* Footer Metadata Fields */}
                         <div className="space-y-2 pt-6 border-t border-gray-50 mt-6">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Assigned Ownership</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Assigned Ownership</label>
                             <div className="flex items-center gap-3 px-6 py-4 bg-gray-50 rounded-[1.25rem]">
                                 <User size={18} className="text-gray-300" />
                                 <span className="text-sm font-bold text-gray-900">{testCase?.assignedTo?.name || "Unassigned"}</span>
@@ -499,7 +499,7 @@ export const TestCaseDetail = () => {
                         </div>
 
                         <div className="space-y-2 pt-6 border-t border-gray-50 mt-6">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Created By</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Created By</label>
                             <div className="flex items-center gap-3 px-6 py-4 bg-gray-50 rounded-[1.25rem]">
                                 <User size={18} className="text-gray-300" />
                                 <span className="text-sm font-bold text-gray-900">{testCase?.createdBy?.name || "N/A"}</span>
@@ -507,7 +507,7 @@ export const TestCaseDetail = () => {
                         </div>
 
                         <div className="space-y-2 pt-6 border-t border-gray-50 mt-6 lg:border-l lg:border-t-0 lg:pl-8">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Date Created</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Date Created</label>
                             <div className="flex items-center gap-3 px-6 py-4 bg-gray-50 rounded-[1.25rem]">
                                 <Calendar size={18} className="text-gray-300" />
                                 <span className="text-sm font-bold text-gray-900">{testCase?.createdAt ? new Date(testCase.createdAt).toLocaleDateString() : "N/A"}</span>
@@ -520,7 +520,7 @@ export const TestCaseDetail = () => {
                     <div className="flex items-center justify-end gap-4 mt-12 pt-8 border-t-2 border-dashed border-gray-50">
                         <button
                             onClick={handleDelete}
-                            className="px-8 py-4 rounded-2xl bg-red-50 text-red-500 font-black text-xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all active:scale-95 flex items-center gap-2"
+                            className="px-8 py-4 rounded-2xl bg-red-50 text-red-500 font-bold text-xs uppercase tracking-wider hover:bg-red-500 hover:text-white transition-all active:scale-95 flex items-center gap-2"
                         >
                             <Trash2 size={16} />
                             Remove Case
@@ -528,7 +528,7 @@ export const TestCaseDetail = () => {
                         <button
                             onClick={handleUpdate}
                             disabled={isUpdating}
-                            className="px-12 py-4 rounded-2xl bg-emerald-900 text-white font-black text-xs uppercase tracking-widest shadow-2xl shadow-emerald-200 hover:bg-emerald-950 transition-all active:scale-95 flex items-center gap-3"
+                            className="px-12 py-4 rounded-2xl bg-emerald-900 text-white font-bold text-xs uppercase tracking-wider shadow-2xl shadow-emerald-200 hover:bg-emerald-950 transition-all active:scale-95 flex items-center gap-3"
                         >
                             {isUpdating ? (
                                 <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />

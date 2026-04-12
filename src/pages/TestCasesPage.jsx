@@ -36,7 +36,7 @@ export const StatusBadge = ({ status }) => {
     const Icon = cfg.icon;
     return (
         <span
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border"
             style={{ color: cfg.color, backgroundColor: cfg.bg, borderColor: `${cfg.color}20` }}
         >
             <Icon size={12} />
@@ -56,7 +56,7 @@ export const PriorityTag = ({ priority }) => {
     const cfg = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.low;
     return (
         <span
-            className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-tight border"
+            className="px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide border"
             style={{ color: cfg.color, backgroundColor: cfg.bg, borderColor: `${cfg.color}15` }}
         >
             {cfg.label}
@@ -184,7 +184,7 @@ export const TestCasesPage = () => {
     };
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        <div className="p-8 max-w-7xl mx-auto space-y-8">
 
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -194,10 +194,10 @@ export const TestCasesPage = () => {
                         className="flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-colors group"
                     >
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-xs font-black uppercase tracking-widest">Back to Details</span>
+                        <span className="text-xs font-bold uppercase tracking-wider">Back to Details</span>
                     </button>
                     <div>
-                        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight flex items-center gap-4">
+                        <h1 className="text-4xl font-bold text-gray-900 tracking-tight flex items-center gap-4">
                             Test Scenarios
                             <span className="text-emerald-500 bg-emerald-50 px-3 py-1 rounded-2xl text-sm font-bold border border-emerald-100 italic">
                                 {feature?.name}
@@ -222,12 +222,12 @@ export const TestCasesPage = () => {
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                 <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl border border-gray-100">
                     <div className="px-6 py-2.5 flex flex-col items-center justify-center">
-                        <span className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Total</span>
+                        <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">Total</span>
                         <span className="text-lg font-bold text-gray-900">{testCases.length}</span>
                     </div>
                     <div className="w-[1px] bg-gray-200 my-2"></div>
                     <div className="px-6 py-2.5 flex flex-col items-center justify-center">
-                        <span className="text-[10px] uppercase font-black text-emerald-500 tracking-widest">Passed</span>
+                        <span className="text-xs uppercase font-bold text-emerald-500 tracking-wider">Passed</span>
                         <span className="text-lg font-bold text-emerald-600">{testCases.filter(t => t.status === 'passed').length}</span>
                     </div>
                 </div>
@@ -249,7 +249,7 @@ export const TestCasesPage = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-50 text-[10px] font-black tracking-[0.2em] uppercase text-gray-400">
+                            <tr className="bg-gray-50/50 border-b border-gray-50 text-xs font-bold tracking-wider uppercase text-gray-400">
                                 <th className="px-10 py-6">Title</th>
                                 <th className="px-6 py-6 text-center">Status</th>
                                 <th className="px-6 py-6 text-center">Priority</th>
@@ -310,7 +310,7 @@ export const TestCasesPage = () => {
                                     <td colSpan="5" className="py-24 text-center">
                                         <div className="flex flex-col items-center gap-3 opacity-20">
                                             <FlaskConical size={64} className="text-gray-400" />
-                                            <p className="text-sm font-black uppercase tracking-widest text-gray-900">No verification found</p>
+                                            <p className="text-sm font-bold uppercase tracking-wider text-gray-900">No verification found</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -336,7 +336,7 @@ export const TestCasesPage = () => {
                             className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col font-medium"
                         >
                             <div className="px-10 py-8 border-b border-gray-50 flex items-center justify-between shrink-0">
-                                <h2 className="text-2xl font-black text-gray-900">
+                                <h2 className="text-2xl font-bold text-gray-900">
                                     {editingTestCase ? 'Refine Scenario' : 'Draft New Scenario'}
                                 </h2>
                                 <button onClick={() => setIsModalOpen(false)} className="p-3 bg-gray-50 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-colors">
@@ -348,21 +348,21 @@ export const TestCasesPage = () => {
                                 {/* Title & Description */}
                                 <div className="grid grid-cols-1 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 italic">Scenario Title</label>
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1 italic">Scenario Title</label>
                                         <input
                                             type="text"
                                             value={formData.title}
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-4 focus:ring-emerald-100 transition-all font-bold placeholder:text-gray-300"
+                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-4 focus:ring-emerald-100 transition-all font-medium placeholder:text-gray-300"
                                             placeholder="e.g. Verify multi-factor auth flow"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 italic">Logic Description</label>
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1 italic">Logic Description</label>
                                         <textarea
                                             value={formData.description}
                                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm min-h-[100px] focus:ring-4 focus:ring-emerald-100 transition-all font-bold placeholder:text-gray-300"
+                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm min-h-[100px] focus:ring-4 focus:ring-emerald-100 transition-all font-medium placeholder:text-gray-300"
                                             placeholder="The technical logic behind this verification..."
                                         />
                                     </div>
@@ -371,11 +371,11 @@ export const TestCasesPage = () => {
                                 {/* Priority & Status */}
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Criticality</label>
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Criticality</label>
                                         <select
                                             value={formData.priority}
                                             onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-4 focus:ring-emerald-100 outline-none"
+                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-4 focus:ring-emerald-100 outline-none"
                                         >
                                             <option value="low">Low Impact</option>
                                             <option value="medium">Medium Impact</option>
@@ -383,11 +383,11 @@ export const TestCasesPage = () => {
                                         </select>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Current State</label>
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Current State</label>
                                         <select
                                             value={formData.status}
                                             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-4 focus:ring-emerald-100 outline-none"
+                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-4 focus:ring-emerald-100 outline-none"
                                         >
                                             <option value="notRun">Not Run</option>
                                             <option value="passed">Passed</option>
@@ -399,12 +399,12 @@ export const TestCasesPage = () => {
 
                                 {/* Expected Result */}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 italic">Success Outcome</label>
+                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1 italic">Success Outcome</label>
                                     <input
                                         type="text"
                                         value={formData.expectedResult}
                                         onChange={(e) => setFormData({ ...formData, expectedResult: e.target.value })}
-                                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-50 rounded-2xl text-sm font-bold text-emerald-900 placeholder:text-emerald-100"
+                                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-50 rounded-2xl text-sm font-medium text-emerald-900 placeholder:text-emerald-100"
                                         placeholder="What is the definitive success criteria?"
                                     />
                                 </div>
@@ -412,20 +412,20 @@ export const TestCasesPage = () => {
                                 {/* Execution Steps */}
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between ml-1">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 italic">Execution Protocol</label>
-                                        <button onClick={addStep} className="text-[10px] font-black uppercase text-emerald-600 hover:text-emerald-700 underline tracking-tighter transition-all">Add Step</button>
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 italic">Execution Protocol</label>
+                                        <button onClick={addStep} className="text-xs font-bold uppercase text-emerald-600 hover:text-emerald-700 underline tracking-wider transition-all">Add Step</button>
                                     </div>
                                     <div className="space-y-3">
                                         {formData.steps.map((step, idx) => (
                                             <div key={idx} className="flex gap-3">
-                                                <div className="w-10 h-10 shrink-0 bg-gray-100 rounded-xl flex items-center justify-center text-[10px] font-black text-gray-500">
+                                                <div className="w-10 h-10 shrink-0 bg-gray-100 rounded-xl flex items-center justify-center text-xs font-bold text-gray-500">
                                                     {idx + 1}
                                                 </div>
                                                 <input
                                                     type="text"
                                                     value={step}
                                                     onChange={(e) => handleStepChange(idx, e.target.value)}
-                                                    className="flex-1 px-5 bg-gray-50/50 border-none rounded-xl text-[13px] font-bold focus:ring-2 focus:ring-emerald-50"
+                                                    className="flex-1 px-5 bg-gray-50/50 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-50"
                                                     placeholder={`Phase ${idx + 1} instructions...`}
                                                 />
                                                 <button onClick={() => removeStep(idx)} className="p-2.5 text-red-300 hover:text-red-500 transition-colors">

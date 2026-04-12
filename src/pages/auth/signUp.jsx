@@ -70,7 +70,7 @@ export default function SignUp() {
   const inputError = "border-red-300 bg-red-50";
 
   return (
-    <div className="min-h-screen flex bg-white" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen flex bg-white">
       {/* LEFT PANEL */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
@@ -88,7 +88,7 @@ export default function SignUp() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5 }}
-            className="text-[28px] font-bold text-gray-900 mb-2 leading-tight"
+            className="text-3xl font-bold text-gray-900 mb-2 leading-tight"
           >
             Manage your testing
           </motion.h2>
@@ -178,7 +178,7 @@ export default function SignUp() {
                   {/* Name row */}
                   <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1.5 font-medium">First name</label>
+                      <label className="block text-xs text-gray-600 mb-1.5 font-bold">First name</label>
                       <input
                         {...register("firstName", { required: "Required" })}
                         className={`${inputBase} ${errors.firstName ? inputError : inputNormal}`}
@@ -186,7 +186,7 @@ export default function SignUp() {
                       {errors.firstName && <p className="text-xs text-red-500 mt-1">{errors.firstName.message}</p>}
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1.5 font-medium">Last name</label>
+                      <label className="block text-xs text-gray-600 mb-1.5 font-bold">Last name</label>
                       <input
                         {...register("lastName", { required: "Required" })}
                         className={`${inputBase} ${errors.lastName ? inputError : inputNormal}`}
@@ -197,7 +197,7 @@ export default function SignUp() {
 
                   {/* Email */}
                   <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible">
-                    <label className="block text-xs text-gray-600 mb-1.5 font-medium">Email address</label>
+                    <label className="block text-xs text-gray-600 mb-1.5 font-bold">Email address</label>
                     <input
                       type="email"
                       {...register("email", {
@@ -211,7 +211,7 @@ export default function SignUp() {
 
                   {/* Password */}
                   <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible">
-                    <label className="block text-xs text-gray-600 mb-1.5 font-medium">Password</label>
+                    <label className="block text-xs text-gray-600 mb-1.5 font-bold">Password</label>
                     <div className={`relative border rounded-lg transition-all focus-within:ring-2 focus-within:ring-gray-100 ${errors.password ? "border-red-300 bg-red-50" : "border-gray-200 bg-white focus-within:border-gray-400"
                       }`}>
                       <input

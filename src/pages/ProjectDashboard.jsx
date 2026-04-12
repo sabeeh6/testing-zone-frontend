@@ -59,7 +59,6 @@ function ProjectModal({ project, onClose, onSave }) {
         exit={{ scale: 0.95, y: 20 }}
         transition={{ type: "spring", stiffness: 300, damping: 28 }}
         className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
-        style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-gray-900">{isEdit ? "Edit Project" : "Create Project"}</h2>
@@ -148,7 +147,6 @@ function DeleteModal({ project, onClose, onDelete }) {
         exit={{ scale: 0.95, y: 20 }}
         transition={{ type: "spring", stiffness: 300, damping: 28 }}
         className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center"
-        style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <AlertTriangle size={20} className="text-red-500" />
@@ -186,7 +184,6 @@ function ViewDrawer({ project, onClose }) {
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 32 }}
         className="w-full max-w-sm bg-white h-full shadow-2xl flex flex-col"
-        style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-base font-bold text-gray-900">Project Details</h2>
@@ -324,7 +321,7 @@ export default function ProjectsDashboard() {
             </div>
             <p className="text-2xl font-bold text-gray-900">{s.value}</p>
             <p className="text-xs font-semibold text-gray-700 mt-0.5">{s.label}</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">{s.sub}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{s.sub}</p>
           </motion.div>
         ))}
       </div>

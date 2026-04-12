@@ -50,7 +50,7 @@ function AvatarStack({ people = [], max = 3 }) {
           <div
             key={i}
             title={name}
-            className="w-7 h-7 rounded-full border-2 border-white bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-gray-100 z-10"
+            className="w-7 h-7 rounded-full border-2 border-white bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-xs font-bold text-white shadow-sm ring-1 ring-gray-100 z-10"
             style={{ zIndex: shown.length - i }}
           >
             {name?.charAt(0)?.toUpperCase()}
@@ -58,7 +58,7 @@ function AvatarStack({ people = [], max = 3 }) {
         );
       })}
       {extra > 0 && (
-        <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[10px] font-semibold text-gray-500 shadow-sm ring-1 ring-gray-100">
+        <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-500 shadow-sm ring-1 ring-gray-100">
           +{extra}
         </div>
       )}
@@ -71,56 +71,7 @@ function AvatarStack({ people = [], max = 3 }) {
   );
 }
 
-// ─── Row Actions Dropdown ──────────────────────────────────────────────────────
-function RowActions({ onEdit, onDelete, onView }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const actions = [
-    { label: "View details", icon: Eye, fn: onView, color: "text-gray-700" },
-    { label: "Edit project", icon: Pencil, fn: onEdit, color: "text-gray-700" },
-    { label: "Delete", icon: Trash2, fn: onDelete, color: "text-red-500" },
-  ];
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="p-1.5 rounded-md hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700"
-      >
-        <MoreVertical size={15} />
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.93, y: -4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.93, y: -4 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute right-0 top-8 z-50 w-44 bg-white border border-gray-100 rounded-xl shadow-xl shadow-gray-200/60 py-1 overflow-hidden"
-          >
-            {actions.map(({ label, icon: Icon, fn, color }) => (
-              <button
-                key={label}
-                onClick={() => { fn?.(); setOpen(false); }}
-                className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors ${color}`}
-              >
-                <Icon size={14} />
-                {label}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+// Removed RowActions dropdown as per request
 
 // ─── Sort Icon ─────────────────────────────────────────────────────────────────
 function SortIcon({ col, sortCol, sortDir }) {
@@ -240,7 +191,7 @@ export default function ProjectsTable({
   const allSelected = paginatedData.length > 0 && selected.size === paginatedData.length;
 
   return (
-    <div className="flex flex-col gap-0" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="flex flex-col gap-0">
       {/* ── Header row ── */}
       <div className="flex items-center justify-between mb-5">
         <div>
@@ -487,11 +438,13 @@ export default function ProjectsTable({
                           >
                             <Pencil size={14} />
                           </button>
-                          <RowActions
-                            onEdit={() => onEdit?.(project)}
-                            onDelete={() => onDelete?.(project)}
-                          // onView={() => onView?.(project)}
-                          />
+                          <button
+                            onClick={() => onDelete?.(project)}
+                            className="p-1.5 rounded-md hover:bg-red-50 transition-colors text-gray-400 hover:text-red-600"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </div>
                       </td>
                     </motion.tr>

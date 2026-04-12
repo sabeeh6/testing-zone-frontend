@@ -69,7 +69,7 @@ export default function SignIn() {
   const inputError = "border-red-300 bg-red-50";
 
   return (
-    <div className="min-h-screen flex bg-white" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen flex bg-white">
       {/* LEFT PANEL */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
@@ -87,7 +87,7 @@ export default function SignIn() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5 }}
-            className="text-[28px] font-bold text-gray-900 mb-2 leading-tight"
+            className="text-3xl font-bold text-gray-900 mb-2 leading-tight"
           >
             Manage your testing
           </motion.h2>
@@ -153,7 +153,7 @@ export default function SignIn() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Email */}
             <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible">
-              <label className="block text-xs text-gray-600 mb-1.5 font-medium">Email address</label>
+              <label className="block text-xs text-gray-600 mb-1.5 font-bold">Email address</label>
               <input
                 type="email"
                 {...register("email", {
@@ -169,7 +169,7 @@ export default function SignIn() {
             {/* Password */}
             <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs text-gray-600 font-medium">Password</label>
+                <label className="block text-xs text-gray-600 font-bold">Password</label>
                 <Link to="/forgot" className="text-xs text-emerald-600 font-semibold hover:underline">
                   Forgot password?
                 </Link>
