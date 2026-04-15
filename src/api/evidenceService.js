@@ -11,9 +11,17 @@ export const evidenceService = {
         return apiClient.post("/evidence/create-evidence", formData);
     },
 
-    // GET /api/evidence/get-evidence/:testCaseId
-    getEvidenceByTestCaseId: async (testCaseId) => {
-        return apiClient.get(`/evidence/get-evidence/${testCaseId}`);
+    // POST /api/evidence/create-evidence (for execution)
+    uploadExecutionEvidence: async (executionId, file) => {
+        const formData = new FormData();
+        formData.append("evidence", file);
+        formData.append("testExecutionId", executionId);
+        return apiClient.post("/evidence/create-evidence", formData);
+    },
+
+    // GET /api/evidence/get-evidence/:id
+    getEvidenceByTestCaseId: async (id, isExecution = false) => {
+        return apiClient.get(`/evidence/get-evidence/${id}?isExecution=${isExecution}`);
     },
 
     // DELETE /api/evidence/del-evidence/:evidenceId

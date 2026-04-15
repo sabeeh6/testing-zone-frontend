@@ -23,6 +23,7 @@ export default function App() {
           <Route path="/features/:id" element={<FeatureDetail />} />
           <Route path="/features/:id/testcases" element={<TestCasesPage />} />
           <Route path="/projects/:projectId/features/:featureId/testcases/:testCaseId" element={<TestCaseDetail />} />
+          <Route path="/projects/:projectId/features/:featureId/testcases/:testCaseId/executions/:executionId" element={<TestCaseDetail />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/signin" replace />} />

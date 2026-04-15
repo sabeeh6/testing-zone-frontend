@@ -17,7 +17,9 @@ import {
     CheckCircle2,
     XCircle,
     Clock,
-    Ban
+    Ban,
+    UserCircle2,
+    History
 } from "lucide-react";
 import { testCaseService } from "../api/testCaseService";
 import { evidenceService } from "../api/evidenceService";
@@ -132,7 +134,8 @@ const ExecutionToggle = ({ status, onChange }) => {
 };
 
 export const TestCaseDetail = () => {
-    const { projectId, featureId, testCaseId } = useParams();
+    const { projectId, featureId, testCaseId, executionId } = useParams();
+    const isExecution = !!executionId;
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [testCase, setTestCase] = useState(null);
@@ -152,15 +155,23 @@ export const TestCaseDetail = () => {
         assignedTo: "",
         isActive: true
     });
+    const [executions, setExecutions] = useState([]);
+    const [fetchingExecs, setFetchingExecs] = useState(false);
 
     useEffect(() => {
         const fetchEverything = async () => {
             try {
                 setLoading(true);
-                const [tcRes, evRes] = await Promise.all([
-                    testCaseService.getTestCaseById(testCaseId),
-                    evidenceService.getEvidenceByTestCaseId(testCaseId)
-                ]);
+                
+                // Polymorphic fetch
+                const tcRes = isExecution 
+                    ? await testCaseService.getExecutionById(executionId)
+                    : await testCaseService.getTestCaseById(testCaseId);
+
+                const evRes = await evidenceService.getEvidenceByTestCaseId(
+                    isExecution ? executionId : testCaseId, 
+                    isExecution
+                );
 
                 if (tcRes.success) {
                     const tc = tcRes.data;
@@ -175,23 +186,31 @@ export const TestCaseDetail = () => {
                         steps: tc.steps && tc.steps.length > 0 ? tc.steps : [""],
                         expectedResult: tc.expectedResult || "",
                         actualResult: tc.actualResult || "",
-                        assignedTo: tc.assignedTo?._id || "",
-                        isActive: true
+                        assignedTo: isExecution ? (tc.userId?._id || tc.userId) : (tc.assignedTo?._id || ""),
+                        isActive: tc.isActive ?? true
                     });
                 }
 
                 if (evRes.success) {
                     setEvidences(evRes.data);
                 }
+
+                // Fetch Executions
+                setFetchingExecs(true);
+                const exRes = await testCaseService.getExecutions(testCaseId);
+                if (exRes.success) {
+                    setExecutions(exRes.data);
+                }
             } catch (error) {
                 console.error("Fetch Error:", error);
                 toast.error("Failed to load scenario details");
             } finally {
                 setLoading(false);
+                setFetchingExecs(false);
             }
         };
         fetchEverything();
-    }, [testCaseId]);
+    }, [testCaseId, executionId, isExecution]);
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -199,7 +218,10 @@ export const TestCaseDetail = () => {
 
         try {
             setIsUploading(true);
-            const res = await evidenceService.uploadEvidence(testCaseId, file);
+            const res = isExecution
+                ? await evidenceService.uploadExecutionEvidence(executionId, file)
+                : await evidenceService.uploadEvidence(testCaseId, file);
+            
             if (res.success) {
                 toast.success("Evidence uploaded");
                 setEvidences(prev => [res.data, ...prev]);
@@ -244,9 +266,12 @@ export const TestCaseDetail = () => {
     const handleUpdate = async () => {
         try {
             setIsUpdating(true);
-            const res = await testCaseService.updateTestCase(testCaseId, formData);
+            const res = isExecution
+                ? await testCaseService.updateExecution(executionId, formData)
+                : await testCaseService.updateTestCase(testCaseId, formData);
+                
             if (res.success) {
-                toast.success("Scenario updated successfully");
+                toast.success(isExecution ? "Execution log updated" : "Scenario updated successfully");
             }
         } catch (error) {
             toast.error("Update failed");
@@ -256,11 +281,15 @@ export const TestCaseDetail = () => {
     };
 
     const handleDelete = async () => {
-        if (!window.confirm("Confirm deletion of this test scenario?")) return;
+        if (!window.confirm("Confirm deletion of this historical record?")) return;
         try {
-            const res = await testCaseService.deleteTestCase(testCaseId);
+            // Future-proofing: could add deleteExecution if needed
+            const res = isExecution 
+                ? { success: false, message: "Use parent to delete entire history" } // Placeholder
+                : await testCaseService.deleteTestCase(testCaseId);
+            
             if (res.success) {
-                toast.success("Scenario deleted");
+                toast.success(isExecution ? "Record deleted" : "Scenario deleted");
                 navigate(-1);
             }
         } catch (error) {
@@ -276,6 +305,13 @@ export const TestCaseDetail = () => {
 
     return (
         <div className="p-8 max-w-[1600px] mx-auto space-y-8">
+            <button
+                onClick={() => navigate(`/features/${featureId}/testcases`)}
+                className="flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-colors group mb-2"
+            >
+                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                <span className="text-xs font-bold uppercase tracking-wider">Back to Scenarios</span>
+            </button>
 
             {/* Hidden File Input */}
             <input
@@ -288,13 +324,17 @@ export const TestCaseDetail = () => {
 
             {/* Header breadcrumbs */}
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-bold text-gray-900">Scenario Configuration</h1>
+                <h1 className="text-2xl font-bold text-gray-900">
+                    {isExecution ? "Re-Test Execution Log" : "Scenario Configuration"}
+                </h1>
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                     <span>Dashboard</span>
                     <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                    <span>{testCase?.featureId?.projectId?.name || "Project"}</span>
+                    <span>{isExecution ? testCase?.testCaseId?.featureId?.projectId?.name : testCase?.featureId?.projectId?.name || "Project"}</span>
                     <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                    <span className="text-emerald-500 underline underline-offset-4 decoration-2">Scenario Details</span>
+                    <span className="text-emerald-500 underline underline-offset-4 decoration-2">
+                        {isExecution ? "Historical Run" : "Scenario Details"}
+                    </span>
                 </div>
             </div>
 
@@ -373,7 +413,8 @@ export const TestCaseDetail = () => {
                                     type="text"
                                     value={formData.title}
                                     onChange={(e) => handleInputChange('title', e.target.value)}
-                                    className="w-full pl-14 pr-6 py-4 bg-gray-50/50 border border-transparent rounded-[1.25rem] text-sm font-bold focus:bg-white focus:border-emerald-200 focus:ring-4 focus:ring-emerald-50/50 outline-none transition-all"
+                                    readOnly={isExecution}
+                                    className={`w-full pl-14 pr-6 py-4 bg-gray-50/50 border border-transparent rounded-[1.25rem] text-sm font-bold focus:bg-white focus:border-emerald-200 focus:ring-4 focus:ring-emerald-50/50 outline-none transition-all ${isExecution ? 'cursor-not-allowed opacity-70' : ''}`}
                                     placeholder="Scenario title..."
                                 />
                             </div>
@@ -515,6 +556,8 @@ export const TestCaseDetail = () => {
                         </div>
 
                     </div>
+
+
 
                     {/* Form Actions */}
                     <div className="flex items-center justify-end gap-4 mt-12 pt-8 border-t-2 border-dashed border-gray-50">

@@ -17,7 +17,10 @@ import {
     XCircle,
     Clock,
     Ban,
-    AlertCircle
+    AlertCircle,
+    RotateCcw,
+    ChevronRight,
+    UserCircle2
 } from "lucide-react";
 import { testCaseService } from "../api/testCaseService";
 import { featureService } from "../api/featureService";
@@ -73,6 +76,10 @@ export const TestCasesPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTestCase, setEditingTestCase] = useState(null);
+    const [isAgainTest, setIsAgainTest] = useState(false);
+    const [expandedRows, setExpandedRows] = useState(new Set());
+    const [executionsMap, setExecutionsMap] = useState({});
+    const [fetchingExecutions, setFetchingExecutions] = useState({});
 
     // Modal State
     const [formData, setFormData] = useState({
@@ -112,19 +119,21 @@ export const TestCasesPage = () => {
         );
     }, [testCases, searchQuery]);
 
-    const handleOpenModal = (tc = null) => {
+    const handleOpenModal = (tc = null, isAgain = false) => {
+        setIsAgainTest(isAgain);
         if (tc) {
             setEditingTestCase(tc);
             setFormData({
                 title: tc.title,
                 description: tc.description || "",
                 priority: tc.priority,
-                status: tc.status,
+                status: isAgain ? "passed" : tc.status,
                 expectedResult: tc.expectedResult || "",
                 steps: tc.steps.length > 0 ? tc.steps : [""]
             });
         } else {
             setEditingTestCase(null);
+            setIsAgainTest(false);
             setFormData({
                 title: "",
                 description: "",
@@ -137,21 +146,59 @@ export const TestCasesPage = () => {
         setIsModalOpen(true);
     };
 
+    const toggleRow = async (tcId) => {
+        const newExpanded = new Set(expandedRows);
+        if (newExpanded.has(tcId)) {
+            newExpanded.delete(tcId);
+        } else {
+            newExpanded.add(tcId);
+            // Fetch executions if not already present
+            if (!executionsMap[tcId]) {
+                try {
+                    setFetchingExecutions(prev => ({ ...prev, [tcId]: true }));
+                    const res = await testCaseService.getExecutions(tcId);
+                    if (res.success) {
+                        setExecutionsMap(prev => ({ ...prev, [tcId]: res.data }));
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch executions:", err);
+                } finally {
+                    setFetchingExecutions(prev => ({ ...prev, [tcId]: false }));
+                }
+            }
+        }
+        setExpandedRows(newExpanded);
+    };
+
     const handleSave = async (e) => {
         e.preventDefault();
         try {
             const payload = { ...formData, featureId: id };
             let res;
-            if (editingTestCase) {
+            if (isAgainTest) {
+                // Remove readonly fields from payload if backend doesn't want them or just send status/result
+                res = await testCaseService.againTest(editingTestCase._id, {
+                    status: formData.status,
+                    actualResult: formData.actualResult || "" // Assuming we add this or just use status
+                });
+            } else if (editingTestCase) {
                 res = await testCaseService.updateTestCase(editingTestCase._id, payload);
             } else {
                 res = await testCaseService.createTestCase(payload);
             }
 
             if (res.success) {
-                toast.success(editingTestCase ? "Test case updated" : "Test case created");
+                toast.success(isAgainTest ? "Execution recorded" : editingTestCase ? "Test case updated" : "Test case created");
                 setIsModalOpen(false);
                 fetchFeatureAndTestCases();
+                // Clear executions cache if it was an "again test" to force refresh
+                if (isAgainTest) {
+                    setExecutionsMap(prev => {
+                        const next = { ...prev };
+                        delete next[editingTestCase._id];
+                        return next;
+                    });
+                }
             }
         } catch (error) {
             toast.error(error.message || "Operation failed");
@@ -165,6 +212,24 @@ export const TestCasesPage = () => {
             if (res.success) {
                 toast.success("Test case deleted");
                 fetchFeatureAndTestCases();
+            }
+        } catch (error) {
+            toast.error("Delete failed");
+        }
+    };
+
+    const handleDeleteExecution = async (e, tcId, execId) => {
+        e.stopPropagation(); // Don't trigger navigation
+        if (!window.confirm("Delete this execution record?")) return;
+        try {
+            const res = await testCaseService.deleteExecution(execId);
+            if (res.success) {
+                toast.success("Execution deleted");
+                // Refresh history list
+                setExecutionsMap(prev => ({
+                    ...prev,
+                    [tcId]: prev[tcId].filter(ex => ex._id !== execId)
+                }));
             }
         } catch (error) {
             toast.error("Delete failed");
@@ -260,50 +325,133 @@ export const TestCasesPage = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {filteredData.map((tc, idx) => (
-                                <motion.tr
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    key={tc._id}
-                                    className="group hover:bg-gray-50/50 transition-colors"
-                                >
-                                    <td className="px-10 py-7">
-                                        <h4
-                                            onClick={() => navigate(`/projects/${feature?.projectId?._id || feature?.projectId}/features/${id}/testcases/${tc._id}`)}
-                                            className="font-bold text-gray-900 group-hover:text-emerald-900 transition-colors line-clamp-1 cursor-pointer hover:underline"
+                                <AnimatePresence key={tc._id}>
+                                    <motion.tr
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.05 }}
+                                        className={`group hover:bg-gray-50/50 transition-colors ${expandedRows.has(tc._id) ? 'bg-emerald-50/30' : ''}`}
+                                    >
+                                        <td className="px-10 py-7">
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    onClick={() => toggleRow(tc._id)}
+                                                    className={`p-1 rounded-md hover:bg-emerald-100/50 transition-colors ${expandedRows.has(tc._id) ? 'text-emerald-600' : 'text-gray-300'}`}
+                                                >
+                                                    {expandedRows.has(tc._id) ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                                </button>
+                                                <h4
+                                                    onClick={() => navigate(`/projects/${feature?.projectId?._id || feature?.projectId}/features/${id}/testcases/${tc._id}`)}
+                                                    className="font-bold text-gray-900 group-hover:text-emerald-900 transition-colors line-clamp-1 cursor-pointer hover:underline"
+                                                >
+                                                    {tc.title}
+                                                </h4>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-7 text-center">
+                                            <StatusBadge status={tc.status} />
+                                        </td>
+                                        <td className="px-6 py-7 text-center">
+                                            <PriorityTag priority={tc.priority} />
+                                        </td>
+                                        <td className="px-6 py-7 text-center">
+                                            <span className="text-xs font-bold text-gray-600">{tc.createdBy?.name || "System"}</span>
+                                        </td>
+                                        <td className="px-6 py-7 max-w-xs">
+                                            <p className="text-xs text-gray-400 font-medium line-clamp-2 leading-relaxed">{tc.description || "—"}</p>
+                                        </td>
+                                        <td className="px-10 py-7">
+                                            <div className="flex items-center justify-end gap-3">
+                                                <button
+                                                    onClick={() => handleOpenModal(tc, true)}
+                                                    className="p-2.5 rounded-xl bg-gray-50 text-emerald-600 hover:bg-emerald-100 transition-all active:scale-95 flex items-center gap-2"
+                                                    title="Again Test"
+                                                >
+                                                    <RotateCcw size={15} />
+                                                    <span className="text-[10px] uppercase font-bold tracking-wider hidden sm:inline">Again</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleOpenModal(tc)}
+                                                    className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all active:scale-95"
+                                                    title="Edit"
+                                                >
+                                                    <Pencil size={15} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(tc._id)}
+                                                    className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </motion.tr>
+
+                                    {/* Expanded History Row */}
+                                    {expandedRows.has(tc._id) && (
+                                        <motion.tr
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="bg-gray-50/50"
                                         >
-                                            {tc.title}
-                                        </h4>
-                                    </td>
-                                    <td className="px-6 py-7 text-center">
-                                        <StatusBadge status={tc.status} />
-                                    </td>
-                                    <td className="px-6 py-7 text-center">
-                                        <PriorityTag priority={tc.priority} />
-                                    </td>
-                                    <td className="px-6 py-7 text-center">
-                                        <span className="text-xs font-bold text-gray-600">{tc.createdBy?.name || "System"}</span>
-                                    </td>
-                                    <td className="px-6 py-7 max-w-xs">
-                                        <p className="text-xs text-gray-400 font-medium line-clamp-2 leading-relaxed">{tc.description || "—"}</p>
-                                    </td>
-                                    <td className="px-10 py-7">
-                                        <div className="flex items-center justify-end gap-3">
-                                            <button
-                                                onClick={() => handleOpenModal(tc)}
-                                                className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all active:scale-95"
-                                            >
-                                                <Pencil size={15} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(tc._id)}
-                                                className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"
-                                            >
-                                                <Trash2 size={15} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </motion.tr>
+                                            <td colSpan="7" className="px-10 py-6 border-l-4 border-emerald-500">
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600">Testing History (Latest First)</h5>
+                                                    </div>
+
+                                                    {fetchingExecutions[tc._id] ? (
+                                                        <div className="py-8 flex items-center justify-center gap-2 text-gray-400">
+                                                            <div className="w-4 h-4 border-2 border-emerald-200 border-t-emerald-500 rounded-full animate-spin"></div>
+                                                            <span className="text-[10px] font-bold uppercase tracking-widest">Loading history...</span>
+                                                        </div>
+                                                    ) : executionsMap[tc._id]?.length > 0 ? (
+                                                        <div className="grid grid-cols-1 gap-3">
+                                                            {executionsMap[tc._id].map((exec, eidx) => (
+                                                                <div 
+                                                                    key={exec._id} 
+                                                                    onClick={() => navigate(`/projects/${feature?.projectId?._id || feature?.projectId}/features/${id}/testcases/${tc._id}/executions/${exec._id}`)}
+                                                                    className="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-100 shadow-sm group/item hover:border-emerald-200 transition-all cursor-pointer hover:shadow-lg hover:bg-emerald-50/10"
+                                                                >
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 text-[10px] font-bold">
+                                                                            {executionsMap[tc._id].length - eidx}
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{new Date(exec.createdAt).toLocaleString()}</p>
+                                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                                <UserCircle2 size={12} className="text-gray-300" />
+                                                                                <span className="text-xs font-bold text-gray-700">{exec.userId?.name || "Tester"}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-6">
+                                                                        <div className="max-w-[200px]">
+                                                                            <p className="text-[10px] italic text-gray-400 line-clamp-1">{exec.actualResult || "No observations recorded"}</p>
+                                                                        </div>
+                                                                        <StatusBadge status={exec.status} />
+                                                                        <button 
+                                                                            onClick={(e) => handleDeleteExecution(e, tc._id, exec._id)}
+                                                                            className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                                                                        >
+                                                                            <Trash2 size={14} />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="py-8 text-center text-gray-300 italic text-xs font-medium">
+                                                            No historical executions found for this scenario.
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </motion.tr>
+                                    )}
+                                </AnimatePresence>
                             ))}
                             {filteredData.length === 0 && (
                                 <tr>
@@ -337,7 +485,7 @@ export const TestCasesPage = () => {
                         >
                             <div className="px-10 py-8 border-b border-gray-50 flex items-center justify-between shrink-0">
                                 <h2 className="text-2xl font-bold text-gray-900">
-                                    {editingTestCase ? 'Refine Scenario' : 'Draft New Scenario'}
+                                    {isAgainTest ? 'Record New Execution' : editingTestCase ? 'Refine Scenario' : 'Draft New Scenario'}
                                 </h2>
                                 <button onClick={() => setIsModalOpen(false)} className="p-3 bg-gray-50 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-colors">
                                     <ArrowLeft className="rotate-90" size={20} />
@@ -352,20 +500,23 @@ export const TestCasesPage = () => {
                                         <input
                                             type="text"
                                             value={formData.title}
+                                            readOnly={isAgainTest}
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-4 focus:ring-emerald-100 transition-all font-medium placeholder:text-gray-300"
+                                            className={`w-full px-6 py-4 rounded-2xl text-sm transition-all font-medium placeholder:text-gray-300 ${isAgainTest ? 'bg-gray-100 text-gray-500 cursor-not-allowed border-none' : 'bg-gray-50 border-none focus:ring-4 focus:ring-emerald-100'}`}
                                             placeholder="e.g. Verify multi-factor auth flow"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1 italic">Logic Description</label>
-                                        <textarea
-                                            value={formData.description}
-                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm min-h-[100px] focus:ring-4 focus:ring-emerald-100 transition-all font-medium placeholder:text-gray-300"
-                                            placeholder="The technical logic behind this verification..."
-                                        />
-                                    </div>
+                                    {!isAgainTest && (
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1 italic">Logic Description</label>
+                                            <textarea
+                                                value={formData.description}
+                                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm min-h-[100px] focus:ring-4 focus:ring-emerald-100 transition-all font-medium placeholder:text-gray-300"
+                                                placeholder="The technical logic behind this verification..."
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Priority & Status */}
@@ -374,8 +525,9 @@ export const TestCasesPage = () => {
                                         <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Criticality</label>
                                         <select
                                             value={formData.priority}
+                                            disabled={isAgainTest}
                                             onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-4 focus:ring-emerald-100 outline-none"
+                                            className={`w-full px-6 py-4 rounded-2xl text-sm font-medium outline-none ${isAgainTest ? 'bg-gray-100 text-gray-500 cursor-not-allowed border-none' : 'bg-gray-50 border-none focus:ring-4 focus:ring-emerald-100'}`}
                                         >
                                             <option value="low">Low Impact</option>
                                             <option value="medium">Medium Impact</option>
@@ -403,17 +555,32 @@ export const TestCasesPage = () => {
                                     <input
                                         type="text"
                                         value={formData.expectedResult}
+                                        readOnly={isAgainTest}
                                         onChange={(e) => setFormData({ ...formData, expectedResult: e.target.value })}
-                                        className="w-full px-6 py-4 bg-emerald-50/50 border border-emerald-50 rounded-2xl text-sm font-medium text-emerald-900 placeholder:text-emerald-100"
+                                        className={`w-full px-6 py-4 rounded-2xl text-sm font-medium ${isAgainTest ? 'bg-emerald-50/20 text-emerald-900 opacity-60 cursor-not-allowed border border-emerald-100' : 'bg-emerald-50/50 border border-emerald-50 text-emerald-900 placeholder:text-emerald-100'}`}
                                         placeholder="What is the definitive success criteria?"
                                     />
                                 </div>
+
+                                {isAgainTest && (
+                                    <div className="space-y-4 pt-4 border-t border-gray-50">
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-emerald-600 ml-1 italic font-bold">Actual Observations</label>
+                                            <textarea
+                                                value={formData.actualResult || ""}
+                                                onChange={(e) => setFormData({ ...formData, actualResult: e.target.value })}
+                                                className="w-full px-6 py-4 bg-emerald-50/20 border border-emerald-100 rounded-2xl text-sm min-h-[100px] focus:ring-4 focus:ring-emerald-100 transition-all font-medium placeholder:text-emerald-400"
+                                                placeholder="What did you observe during this specific execution?"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Execution Steps */}
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between ml-1">
                                         <label className="text-xs font-bold uppercase tracking-wider text-gray-400 italic">Execution Protocol</label>
-                                        <button onClick={addStep} className="text-xs font-bold uppercase text-emerald-600 hover:text-emerald-700 underline tracking-wider transition-all">Add Step</button>
+                                        {!isAgainTest && <button onClick={addStep} className="text-xs font-bold uppercase text-emerald-600 hover:text-emerald-700 underline tracking-wider transition-all">Add Step</button>}
                                     </div>
                                     <div className="space-y-3">
                                         {formData.steps.map((step, idx) => (
@@ -424,13 +591,16 @@ export const TestCasesPage = () => {
                                                 <input
                                                     type="text"
                                                     value={step}
+                                                    readOnly={isAgainTest}
                                                     onChange={(e) => handleStepChange(idx, e.target.value)}
-                                                    className="flex-1 px-5 bg-gray-50/50 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-50"
+                                                    className={`flex-1 px-5 rounded-xl text-sm font-medium ${isAgainTest ? 'bg-gray-100 text-gray-500 cursor-not-allowed border-none' : 'bg-gray-50/50 border-none focus:ring-2 focus:ring-emerald-50'}`}
                                                     placeholder={`Phase ${idx + 1} instructions...`}
                                                 />
-                                                <button onClick={() => removeStep(idx)} className="p-2.5 text-red-300 hover:text-red-500 transition-colors">
-                                                    <XCircle size={18} />
-                                                </button>
+                                                {!isAgainTest && (
+                                                    <button onClick={() => removeStep(idx)} className="p-2.5 text-red-300 hover:text-red-500 transition-colors">
+                                                        <XCircle size={18} />
+                                                    </button>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -448,7 +618,7 @@ export const TestCasesPage = () => {
                                     onClick={handleSave}
                                     className="px-10 py-3.5 rounded-2xl bg-emerald-900 text-white font-bold shadow-xl shadow-emerald-200 hover:bg-emerald-950 transition-all"
                                 >
-                                    {editingTestCase ? 'Update Scenario' : 'Save Protocol'}
+                                    {isAgainTest ? 'Record Result' : editingTestCase ? 'Update Scenario' : 'Save Protocol'}
                                 </button>
                             </div>
                         </motion.div>

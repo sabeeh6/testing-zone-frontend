@@ -25,4 +25,29 @@ export const testCaseService = {
     deleteTestCase: async (id) => {
         return apiClient.delete(`/tester/delete-testcase/${id}`);
     },
+
+    // POST /tester/again-test/:id
+    againTest: async (id, data) => {
+        return apiClient.post(`/tester/again-test/${id}`, data);
+    },
+
+    // GET /tester/get-executions/:id
+    getExecutions: async (id) => {
+        return apiClient.get(`/tester/get-executions/${id}`);
+    },
+
+    // GET /tester/get-execution/:id
+    getExecutionById: async (id) => {
+        return apiClient.get(`/tester/get-execution/${id}`);
+    },
+
+    // PUT /tester/update-execution/:id
+    updateExecution: async (id, data) => {
+        return apiClient.put(`/tester/update-execution/${id}`, data);
+    },
+
+    // DELETE /tester/delete-execution/:id
+    deleteExecution: async (id) => {
+        return apiClient.delete(`/tester/delete-execution/${id}`);
+    },
 };
