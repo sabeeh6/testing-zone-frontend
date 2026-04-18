@@ -50,9 +50,10 @@ export default function SignIn() {
       console.log("Sign in success:", response);
       // For professional approach, store token if needed, or just redirect
       if (response.success) {
-        // Store token in cookies for frontend route protection
+        // Store token in cookies and localStorage for frontend route protection and cross-origin requests
         const token = response.data?.token;
         if (token) {
+          localStorage.setItem('authToken', token);
           document.cookie = `authToken=${token}; path=/; max-age=${2 * 24 * 60 * 60}; samesite=strict`;
         }
         navigate("/dashboard");
